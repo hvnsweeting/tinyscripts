@@ -1,0 +1,6 @@
+./endpoint.sh keystone identity "KEYSTONE" "5000/v2.0" "35357/v2.0"
+./endpoint.sh nova compute "NOVA" "8774:/v2/%(tenant_id)s'"
+./endpoint.sh volume volume "NOVA volume" "8776/v1/%(tenant_id)s"
+./endpoint.sh glance image "GLANCE image" "9292/v1"
+./endpoint.sh ec2 ec2 "EC2 Layer" "8773/services/Cloud" "8773/services/Admin"
+./endpoint.sh swift object-store "Object store" "8080/v1/AUTH_%(tenant_id)s" "8080/"
