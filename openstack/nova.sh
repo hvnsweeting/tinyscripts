@@ -9,3 +9,6 @@ nova-manage network create private 192.168.100.0/24 1 256
 
 killall dnsmasq
 service nova-network restart
+
+nova keypair-add --pub_key ~/.ssh/id_rsa.pub mykey
+nova keypair-list
