@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FRONTEND=tmux # this can be changed to byobu - a frontend of tmux
+FRONTEND=byobu
 ACTIVE_IFACE=$(ip li | grep 'state UP' | head -n 1 | awk '{print $2}' | tr -d ':')
 
 $FRONTEND new -d -s hvn
