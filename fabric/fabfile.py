@@ -1,20 +1,20 @@
 from fabric.api import *
 
 SALT_MASTER = '192.168.122.1'
-ADMIN = '192.168.122.30'
-OSD = '192.168.122.250'
-CLIENT = '192.168.122.213'
+GUEST_NAME = "ubun2"
+
+def myhost():
+    env.hosts = ["192.168.122.88"]
+
 def master():
-    env.hosts = [ADMIN]
+    env.hosts = [SALT_MASTER]
 
-def server():
-    env.hosts = [OSD]
-
-def client():
-    env.hosts = [CLIENT]
+def copyssh():
+    for host in env.hosts:
+        local("ssh-copy-id " + host)
 
 def change_hostname():
-    hostname = "ubun2"
+    hostname = GUEST_NAME
     sudo("echo %s > /etc/hostname" % hostname)
     sudo("sed -i 's/127.0.1.1.*/127.0.1.1\t%s/' /etc/hosts" % hostname)
 
