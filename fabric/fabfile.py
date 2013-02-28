@@ -1,11 +1,10 @@
 from fabric.api import *
 
 SALT_MASTER = '192.168.36.23'
-GUEST_NAME = "ubun2"
-MY_USER = ""
-MY_PASSWD = ""
-#env.user = ''
-#env.password = ''
+MY_USER = "hungnv"
+MY_PASSWD = "hungnv"
+env.user = MY_USER
+env.password = MY_PASSWD
 
 def myhost():
     env.hosts = ["192.168.32.9" + str(i) for i in range(1,4)] + [SALT_MASTER]
@@ -21,6 +20,23 @@ def copyssh():
 def change_hostname(hostname):
     sudo("echo %s > /etc/hostname" % hostname)
     sudo("sed -i 's/127.0.1.1.*/127.0.1.1\t%s/' /etc/hosts" % hostname)
+
+def umount(dev="/dev/sdc1"):
+    with settings(warn_only=True):
+        sudo("umount " + dev)
+    run("mount")
+
+def kill_ceph():
+    with settings(warn_only=True):
+        sudo("kill `pgrep ceph`")
+
+def clean_disk():
+    with settings(warn_only=True):
+        sudo("mkfs.btrfs /dev/sdc1")
+        #sudo("mkdir -p /tmp/tempx/")
+        #sudo("mount /dev/sdc1/ /tmp/tempx/")
+        #sudo("rm -rf /tmp/tempx/*")
+        #run("ls -l /tmp/tempx/")
 
 def salt_bootstrap():
     sudo('wget -O - http://bootstrap.saltstack.org | sudo sh')
