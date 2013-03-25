@@ -1,13 +1,16 @@
 from fabric.api import *
 
-SALT_MASTER = '192.168.36.23'
-MY_USER = "hungnv"
-MY_PASSWD = "hungnv"
+SALT_MASTER = '192.168.32.92'
+MY_USER = "hvn"
+MY_PASSWD = "hehehe"
 env.user = MY_USER
 env.password = MY_PASSWD
 
 def myhost():
-    env.hosts = ["192.168.32.9" + str(i) for i in range(1,4)] + [SALT_MASTER]
+    env.hosts = ["192.168.32.9" + str(i) for i in range(1,4)] + [SALT_MASTER] + ['192.168.36.23']
+
+def vm():
+    env.hosts = ["192.168.122.250"]
 
 
 def master():
@@ -51,10 +54,15 @@ def salt_config():
     sudo("sed -i 's/[#]*master:.*/master: %s/g' /etc/salt/minion" % SALT_MASTER)
     salt_restart()
 
+def change_pass():
+    sudo("echo -e '%s\n%s' | passwd %s" % (MY_PASSWD, MY_PASSWD, MY_USER))
 def create_sudo():
     with settings(warn_only=True):
         sudo("useradd " + MY_USER + " -G sudo,adm -s /bin/bash -m")
-        sudo("echo -e '%s\n%s' | passwd %s" % (MY_PASSWD, MY_PASSWD, MY_USER))
+        change_pass()
+
+def apt_proxy():
+    sudo('echo \'Acquire::http { Proxy "http://123.30.170.85:3142"; };\' > /etc/apt/apt.conf.d/02proxy')
 
 def fix_apt():
     sudo('rm -r /var/lib/apt/lists')
