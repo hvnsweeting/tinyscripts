@@ -5,4 +5,4 @@ if [ -z $1 ]; then
 fi
 
 cd $1
-find | grep absent | sed -e 's:/:.:g' -e 's/.sls//' -e 's/\.\.//g'
+find | grep absent | grep -v '.git' | sed -e 's:/:.:g' -e 's/.sls//' -e 's/\.\.//g' | sort -n
