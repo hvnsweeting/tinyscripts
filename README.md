@@ -1,4 +1,4 @@
 tinyscripts
 ===========
 
-my scripts, fabfile
+Collection of all my util scripts
