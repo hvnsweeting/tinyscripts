@@ -55,6 +55,12 @@ function check_number_of_last_order {
   check_result_print "Only one '- order: last' takes effect, use only one of that and replace other with specific requisite (maybe you want require sls: sls_file)"
 }
 
+function check_SLS_include_salt_minion {
+  grep -Rin '^  \- salt.minion$' -B1 $dir | grep -v ' if '
+  check_result_print "In CI, salt.minion must not be included by ANY SLS. To allow CI test for SLS included it, wrap if condition to only allow them when not in CI test"
+}
+
 check_pip_installed
 check_bad_state_style
 check_number_of_last_order
+check_SLS_include_salt_minion
