@@ -60,7 +60,18 @@ function check_SLS_include_salt_minion {
   check_result_print "In CI, salt.minion must not be included by ANY SLS. To allow CI test for SLS included it, wrap if condition to only allow them when not in CI test"
 }
 
+function check_bad_pillar_usage {
+  find $dir -name '*.sls' -or -name '*.jinja2' -print0 | xargs -0 grep -E "pillar\.get'\]\([^,]+\)"
+  check_result_print "Use pillar['key1']['key2'] if 'key2' is a mandatory key. Using salt['pillar.get'] must provide an optional value"
+}
+
+function check_pillar_get_usage {
+  find $dir -name '*.sls' -or -name '*.jinja2' -print0 | xargs -0 grep -Rin pillar.get\(
+  check_result_print "pillar.get is buggy, uses salt['pillar.get']"
+}
+
 check_pip_installed
 check_bad_state_style
 check_number_of_last_order
 check_SLS_include_salt_minion
+check_bad_pillar_usage
