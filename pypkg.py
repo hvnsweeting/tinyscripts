@@ -37,7 +37,8 @@ def count(dest=None, ftype='.py'):
     def filenames():
         for d, _, fns in os.walk(dest):
             for fn in fns:
-                yield os.path.join(d, fn)
+                if fn.endswith(ftype):
+                    yield os.path.join(d, fn)
 
     for fn in filenames():
         no_files += 1
