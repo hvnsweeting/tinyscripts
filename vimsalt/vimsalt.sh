@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "This install script requires: vim git wget"
+echo "This install script requires: vim git"
 #apt-get install -y vim git
 
 tempdir=$(mktemp -d)
@@ -20,5 +20,5 @@ for dir in *; do
     cp -r $dir/* ~/.vim
 done
 
-wget -O ~/.vimrc https://raw.github.com/hvnsweeting/hvnrc/master/vimrc
+python2 -c 'import urllib, os; urllib.urlretrieve("https://raw.github.com/hvnsweeting/hvnrc/master/vimrc", os.path.expanduser("~/.vimrc"))'
 rm -rf $tempdir
