@@ -16,10 +16,6 @@
 echo "This install script requires: vim git"
 #apt-get install -y vim git
 
-if ( ! grep _VIMSALT_ ~/README |& >/dev/null); then
-    echo "_VIMSALT_ installed, vim now supports .SLS and snippet" >> ~/README
-fi
-
 tempdir=$(mktemp -d)
 cd $tempdir
 git clone git://github.com/saltstack/salt-vim.git
@@ -39,3 +35,8 @@ done
 
 python2 -c 'import urllib, os; urllib.urlretrieve("https://raw.github.com/hvnsweeting/hvnrc/master/vimrc", os.path.expanduser("~/.vimrc"))'
 rm -rf $tempdir
+
+if ( ! grep _VIMSALT_ ~/README 2>&1 >/dev/null); then
+    echo "_VIMSALT_ installed at $(date), vim now supports .SLS and snippet" >> ~/README
+fi
+
