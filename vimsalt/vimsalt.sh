@@ -3,6 +3,10 @@
 echo "This install script requires: vim git"
 #apt-get install -y vim git
 
+if ( ! grep _VIMSALT_ ~/README |& >/dev/null); then
+    echo "_VIMSALT_ installed, vim now supports .SLS and snippet" >> ~/README
+fi
+
 tempdir=$(mktemp -d)
 cd $tempdir
 git clone git://github.com/saltstack/salt-vim.git
