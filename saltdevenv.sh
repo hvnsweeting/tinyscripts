@@ -39,7 +39,7 @@ else
 fi
 
 if ( ! grep _SALTDEVENV_ ~/README 2>&1 > /dev/null ); then
-    echo "_SALTDEVENV_ installed at $date, use ``source $dest_dir/bin/activate`` to active venv for dev SaltStack``" >> ~/README
+    echo "_SALTDEVENV_ installed at $(date), use ``source $dest_dir/bin/activate`` to active venv for dev SaltStack``" >> ~/README
 fi
 echo "Use ``source $dest_dir/bin/activate`` to active venv for dev SaltStack``"
 
