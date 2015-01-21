@@ -19,18 +19,26 @@ def main():
     argp = argparse.ArgumentParser()
     argp.add_argument('LOGFILE')
     argp.add_argument('--verbose', '-v', action='store_true')
+    argp.add_argument('--print-name', '-p', action='store_true',
+                      help='print to stdout the test testname where time '
+                           'consuming step happened')
     argp.add_argument('--larger-equal', '-l', metavar='N seconds',
-                      type=int, default=20)
+                      help='only print out the step which took >= N seconds',
+                      type=int,
+                      default=20)
 
     args = argp.parse_args()
 
-    prior_line = ''
+    prior_line = testname = ''
     if args.LOGFILE:
         infile = open(args.LOGFILE)
     else:
         infile = sys.stdin
 
     for i, line in enumerate(infile):
+        line = line.strip()
+        if 'Run states:' in line and '.absent' not in line:
+            testname = line
         try:
             timestr = line.split(',')[0]
             timeobj = datetime.datetime.strptime(timestr, '%Y-%m-%d %H:%M:%S')
@@ -56,11 +64,22 @@ def main():
 
         # gap position must be consistent, output must on 1 line to be able to
         # feed output to other UNIX tools - e.g sort -k1,1
+        def _print_output(msg, print_name, testname):
+            if print_name:
+                print testname
+            print msg
+
+        # when timezone changed, this tool will be fooled, ignore that case
+        if "{'timezone':" in line:
+            continue
+
         if args.verbose:
-            output = '{0} seconds FROM {1} ---> {2}'
-            print output.format(gap, prior_line.strip(), line.strip())
+            output = '{0} seconds FROM {1} ---> {2}'.format(gap,
+                                                            prior_line, line)
+            _print_output(output, args.print_name, testname)
         else:
-            print gap, timestr
+            output = '{0} {1}'.format(gap, timestr)
+            _print_output(output, args.print_name, testname)
 
         prior_line = line
 
