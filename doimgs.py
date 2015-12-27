@@ -29,12 +29,16 @@ def main():
                       )
     args = argp.parse_args()
 
-    try:
-        token = open(os.path.expanduser('~/.digitalocean')).read().strip()
-    except IOError as e:
-        print e
-        print "Please put a DigitalOcean API v2 token to ~/.digitalocean"
-        sys.exit(1)
+    token = os.environ.get('DIGITALOCEAN_API_TOKEN', None)
+    if not token:
+        print 'env variable DIGITALOCEAN_API_TOKEN is not set'
+        try:
+            print 'reading token from ~/.digitalocean'
+            token = open(os.path.expanduser('~/.digitalocean')).read().strip()
+        except IOError as e:
+            print e
+            print "Please put a DigitalOcean API v2 token to ~/.digitalocean"
+            sys.exit(1)
 
     manager = digitalocean.Manager(token=token)
     slugs = args.slugs or ('ubuntu-14-04-x64', 'ubuntu-12-04-x64')
