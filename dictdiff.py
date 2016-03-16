@@ -1,7 +1,15 @@
+#!/usr/bin/env python
 import yaml
 
 
-def ddiff(d1, d2, depth=0):
+ALLOW_LEN = 50
+
+
+def shortern(s):
+    return str(s)[:ALLOW_LEN] + '.....' if len(str(s)) > ALLOW_LEN else s
+
+
+def ddiff(d1, d2, depth=0, sign='+'):
     for k, v in d1.iteritems():
         if k in d2:
             if d1[k] == d2[k]:
@@ -9,21 +17,11 @@ def ddiff(d1, d2, depth=0):
             else:
                 if isinstance(v, dict) and isinstance(d2[k], dict):
                     print '%s%s:' % (depth * '  ', k)
-                    ddiff(v, d2[k], depth+1)
+                    ddiff(v, d2[k], depth+1, sign)
                 else:
-                    print '%s%s: %s != %s' % (depth * '  ', k, v, d2[k])
+                    print '%s%s: %s != %s' % (depth * '  ', k, shortern(v), shortern(d2[k]))
         else:
-            print '%s%s:...' % (depth * '  ', k)
-
-
-def test():
-    da = {'a': {'b': {'1': 1}}, 'b': {2: 3}}
-    db = {'a': {'c': '1'}, 'c': {2: 3}}
-    print da
-    print db
-    ddiff(da, db)
-    print '*' * 40
-    ddiff(db, da)
+            print '%s%s%s: %s' % (sign, depth * '  ', shortern(k), shortern(v))
 
 
 def main():
@@ -33,7 +31,7 @@ def main():
         d2 = yaml.load(f2)
         ddiff(d1, d2)
         print '*' * 40
-        ddiff(d2, d1)
+        ddiff(d2, d1, sign='-')
 
 
 if __name__ == "__main__":
