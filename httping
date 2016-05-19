@@ -1,0 +1,30 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
+'''
+Simple measure time to load a site - HTML only.
+Feels like ping, but for HTTP.
+'''
+
+import argparse
+import time
+import requests
+
+
+def main():
+    argp = argparse.ArgumentParser()
+    argp.add_argument('url', help='url to run httping against')
+    args = argp.parse_args()
+
+    res_time = []
+    for i in range(10):
+        start = time.time()
+        res = requests.get(args.url)
+        if res.status_code == 200:
+            took = time.time() - start
+            print "{0}, code {1}, took {2}".format(i+1, res.status_code, took)
+            res_time.append(took)
+    print "Average: {0}".format(sum(res_time)/float(len(res_time)))
+
+if __name__ == "__main__":
+    main()
