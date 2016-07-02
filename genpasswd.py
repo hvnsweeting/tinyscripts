@@ -4,9 +4,10 @@ import random
 
 
 PUNC_NO_QUOTE = string.punctuation.replace('"', '').replace("'", "")
+DEFAULT_LENGTH = 16
 
 
-def gen_passwd(length=16):
+def gen_passwd(length=DEFAULT_LENGTH):
     result = []
     result.append(random.choice(string.ascii_lowercase))
     result.append(random.choice(string.ascii_uppercase))
@@ -24,9 +25,12 @@ def main():
     argp = argparse.ArgumentParser()
     argp.add_argument('users', nargs='*')
     argp.add_argument('-c', '--command')
+    argp.add_argument('-l', '--length', default=DEFAULT_LENGTH, type=int,
+                      help='length of password')
     args = argp.parse_args()
+
     if not args.users:
-        print gen_passwd()
+        print gen_passwd(args.length)
         return
 
     if args.command:
@@ -34,7 +38,7 @@ def main():
         cmd = shlex.split(args.command)
 
     for username in args.users:
-        passwd = gen_passwd()
+        passwd = gen_passwd(args.length)
         print '{0}: {1}'.format(username, passwd)
         if args.command:
             cmd = shlex.split(args.command)
