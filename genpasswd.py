@@ -8,16 +8,18 @@ PUNC_NO_QUOTE = string.punctuation.replace('"', '').replace("'", "")
 DEFAULT_LENGTH = 16
 
 
-def gen_passwd(length=DEFAULT_LENGTH):
+def gen_passwd(length=DEFAULT_LENGTH, with_quote=False):
+    punc = string.punctuation if with_quote else PUNC_NO_QUOTE
+
     result = []
     result.append(random.choice(string.ascii_lowercase))
     result.append(random.choice(string.ascii_uppercase))
     result.append(random.choice(string.digits))
-    result.append(random.choice(PUNC_NO_QUOTE))
+    result.append(random.choice(punc))
     for i in range(length-len(result)):
         result.append(random.choice(
             string.ascii_letters +
-            string.digits + PUNC_NO_QUOTE))
+            string.digits + punc))
     random.shuffle(result)
     return ''.join(result)
 
@@ -37,6 +39,8 @@ def main():
     argp = argparse.ArgumentParser()
     argp.add_argument('users', nargs='*')
     argp.add_argument('-c', '--command')
+    argp.add_argument('-q', '--quote', action='store_true', default=False,
+                      help='allow quote \' or " in password')
     argp.add_argument('-i', '--stdin', action='store_true',
                       help='pass generated password to command' 'as stdin')
     argp.add_argument('-l', '--length', default=DEFAULT_LENGTH, type=int,
@@ -51,13 +55,13 @@ def main():
         return
 
     if not args.users:
-        passwd = gen_passwd(args.length)
+        passwd = gen_passwd(args.length, args.quote)
         print passwd
         if args.command:
             handle_command(cmd, passwd, args.stdin)
 
     for username in args.users:
-        passwd = gen_passwd(args.length)
+        passwd = gen_passwd(args.length, args.quote)
         print '{0}: {1}'.format(username, passwd)
 
         if args.command:
