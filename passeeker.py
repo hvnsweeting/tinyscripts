@@ -13,13 +13,15 @@ SENSITIVE_KEYWORDS = (
     'database',
 )
 
+PERMITTED_LENGTH = 200
+
 
 def false(line):
     return False
 
 
 def seek_result(filepath, skip_func=false):
-    found = False
+    printed_filename = False
     with open(filepath) as f:
         idx = 1
         for line in f:
@@ -27,12 +29,10 @@ def seek_result(filepath, skip_func=false):
             if any(kw in line for kw in SENSITIVE_KEYWORDS):
                 if skip_func(line):
                     continue
-                if found is False:
+                if printed_filename is False:
                     print('Found in %s' % filepath)
-                found = True
-                if len(line) > 200:
-                    line = line[:200]
-                yield '%4d %s' % (idx, line)
+                    printed_filename = True
+                yield '%4d %s' % (idx, line[:PERMITTED_LENGTH])
             idx += 1
 
 
