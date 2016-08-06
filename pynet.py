@@ -6,7 +6,6 @@ Python network discover tool
 '''
 
 
-import itertools as itt
 import json
 import logging
 import re
@@ -37,14 +36,6 @@ def ping(ip):
             print(loss, avg)
 
 
-def list_to_dict(parts):
-    return dict(
-        zip(itt.islice(parts, 0, len(parts), 2),
-            itt.islice(parts, 1, len(parts), 2)
-            )
-    )
-
-
 class PyNet(object):
     def __init__(self):
         self._index = None
@@ -52,25 +43,29 @@ class PyNet(object):
         self.gateway = None
         self.lan_ipv4 = None
 
-        self.load_default_route()
+        self.load_interfaces()
         self.hosts = []
-        self.load_ip()
 
-    def load_default_route(self):
-        logger.info("Getting default gateway")
+    def __str__(self):
+        return "interface: {0} - IPv4: {1} - mask: {2}".format(
+                self.interface,
+                self.lan_ipv4,
+                self.netmask
+        )
+
+    def load_interfaces(self):
+        logger.info("Getting default interface")
         default = list(netifaces.gateways()['default'].items())[0]
         self._index = default[0]
         self.gateway, self.interface = default[1]
-        return self.gateway
 
-    def load_ip(self):
         iface = netifaces.ifaddresses(self.interface)[self._index][0]
         self.lan_ipv4 = iface['addr']
         self.broadcast = iface['broadcast']
         self.netmask = iface['netmask']
 
     def scan_network(self):
-        cidr = self.lan_ipv4 + "/24"  # TODO get real netmask
+        cidr = self.lan_ipv4 + "/" + get_net_size(self.netmask)
         logger.info("Nmap scanning CIDR: %s", cidr)
         cmd = ["nmap", "-sP", cidr]
         output = spr.check_output(cmd)
@@ -128,6 +123,13 @@ class PyNet(object):
         print(waninfo)
 
 
+def get_net_size(netmask):
+    binary_str = ''
+    for octet in netmask.split('.'):
+        binary_str += bin(int(octet))[2:].zfill(8)
+    return str(len(binary_str.rstrip('0')))
+
+
 def cmdoutlines(cmd):
     for line in spr.check_output(cmd).splitlines():
         yield line.decode().strip()
@@ -136,6 +138,7 @@ def cmdoutlines(cmd):
 def main():
     # TODO ping 3 different sources
     c = PyNet()
+    print(c)
     c.show_my_wan()
     c.scan_network()
     c.show_hosts()
