@@ -38,7 +38,6 @@ def ping(ip):
 
 class PyNet(object):
     def __init__(self):
-        self._index = None
         self.interface = None
         self.gateway = None
         self.lan_ipv4 = None
@@ -55,11 +54,10 @@ class PyNet(object):
 
     def load_interfaces(self):
         logger.info("Getting default interface")
-        default = list(netifaces.gateways()['default'].items())[0]
-        self._index = default[0]
-        self.gateway, self.interface = default[1]
+        iface = netifaces.gateways()['default'][netifaces.AF_INET]
+        self.gateway, self.interface = iface
 
-        iface = netifaces.ifaddresses(self.interface)[self._index][0]
+        iface = netifaces.ifaddresses(self.interface)[netifaces.AF_INET][0]
         self.lan_ipv4 = iface['addr']
         self.broadcast = iface['broadcast']
         self.netmask = iface['netmask']
@@ -97,10 +95,14 @@ class PyNet(object):
         for line in cmdoutlines(cmd):
             logger.debug(line)
 
-    def show_gateway(self):
-        cmd = ['nmap', '-A', '-T4', self.gateway]
+    def full_scan(self, ip):
+        cmd = ["nmap", "-A", "-T4", ip]
+        logger.info("nmap fullscan: %s", cmd)
         for line in cmdoutlines(cmd):
-            print(line)
+            logger.debug(line)
+
+    def show_gateway(self):
+        self.full_scan(self.gateway)
 
     def show_my_wan(self):
         logger.info("Getting WAN data:")
@@ -142,9 +144,12 @@ def main():
     c.show_my_wan()
     c.scan_network()
     c.show_hosts()
-    for host in c.hosts:
-        #  PyNet.ping(host)
-        PyNet.ping_sweep(host)
+    for host_ip in c.hosts:
+        # PyNet.ping(host)
+        # PyNet.ping_sweep(host)
+        # c.full_scan(host)
+        pass
+
     c.show_gateway()
 
     # - save all data to db
