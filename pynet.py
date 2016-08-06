@@ -6,7 +6,6 @@ Python network discover tool
 '''
 
 
-import ipaddress
 import itertools as itt
 import json
 import logging
@@ -14,6 +13,9 @@ import re
 import sys
 import subprocess as spr
 import urllib.request
+
+import netifaces
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -44,38 +46,38 @@ def list_to_dict(parts):
 
 
 class PyNet(object):
-    def __init__(self, iface='en0'):
-        self.interface = iface
-        self._my_ip = None
-        self.hosts = []
+    def __init__(self):
+        self._index = None
+        self.interface = None
         self.gateway = None
+        self.lan_ipv4 = None
 
-    @property
-    def my_ip(self):
-        if self._my_ip:
-            return self._my_ip
+        self.load_default_route()
+        self.hosts = []
+        self.load_ip()
 
-        output = spr.check_output(['ifconfig', self.interface])
-        for line in output.splitlines():
-            # inet 10.235.31.220 netmask 0xfffffc00 broadcast 10.235.31.255
-            if b'inet ' in line:
-                parts = line.decode().strip().split()
-        data = list_to_dict(parts)
-        # TODO get mask
-        # netmarks = int(data['netmask'], 16)
-        ipaddr = ipaddress.ip_address(data['inet'])
-        self._my_ip = str(ipaddr)
-        return self._my_ip
+    def load_default_route(self):
+        logger.info("Getting default gateway")
+        default = list(netifaces.gateways()['default'].items())[0]
+        self._index = default[0]
+        self.gateway, self.interface = default[1]
+        return self.gateway
+
+    def load_ip(self):
+        iface = netifaces.ifaddresses(self.interface)[self._index][0]
+        self.lan_ipv4 = iface['addr']
+        self.broadcast = iface['broadcast']
+        self.netmask = iface['netmask']
 
     def scan_network(self):
-        cidr = self.my_ip + "/24"  # TODO get real netmask
+        cidr = self.lan_ipv4 + "/24"  # TODO get real netmask
         logger.info("Nmap scanning CIDR: %s", cidr)
         cmd = ["nmap", "-sP", cidr]
         output = spr.check_output(cmd)
         for line in output.splitlines():
             logger.debug("Nmap output: %s", line)
             line = line.decode().split()
-            if self.my_ip in line:
+            if self.lan_ipv4 in line:
                 continue
             # Nmap scan report for 10.235.51.221
             if "for" in line:
@@ -100,19 +102,15 @@ class PyNet(object):
         for line in cmdoutlines(cmd):
             logger.debug(line)
 
-    def default_route(self):
-        cmd = ['netstat', '-nr']
-        for line in cmdoutlines(cmd):
-            if 'default' in line.split():
-                self.gateway = line.split()[1]
-                return self.gateway
-
     def show_gateway(self):
         cmd = ['nmap', '-A', '-T4', self.gateway]
         for line in cmdoutlines(cmd):
             print(line)
 
     def show_my_wan(self):
+        logger.info("Getting WAN data:")
+
+        waninfo = None
         with urllib.request.urlopen(
             urllib.request.Request(
                 'http://ipinfo.io',
@@ -120,8 +118,13 @@ class PyNet(object):
                 # default python user-agent
                 headers={'User-Agent': 'python-requests/2.10.0'})
         ) as f:
-            waninfo = json.loads(f.read().decode())
-        logger.info("Getting WAN data:")
+            data = f.read()
+            logger.debug("Got wan info: %s", data[:100])
+            try:
+                waninfo = json.loads(f.read().decode())
+            except json.decoder.JSONDecodeError:
+                # TODO use dig when cannot get by ipinfo
+                pass
         print(waninfo)
 
 
@@ -132,7 +135,7 @@ def cmdoutlines(cmd):
 
 def main():
     # TODO ping 3 different sources
-    c = PyNet('en0')
+    c = PyNet()
     c.show_my_wan()
     c.scan_network()
     c.show_hosts()
@@ -148,7 +151,6 @@ def main():
     # hosts table (MAP, ip, hostname, ping, port, device type, misc, time)
 
     # TODO get wifiname
-    print(c.default_route())
 
 
 if __name__ == "__main__":
