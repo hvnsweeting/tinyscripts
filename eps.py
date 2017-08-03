@@ -1,17 +1,16 @@
-#!/usr/bin/env python
-# coding: utf-8
+#!/usr/bin/env python3
 '''
 Explain all running processes.
 Require: psutil>=5.2.2
 '''
 import subprocess as spr
+from functools import lru_cache
 
 import psutil
 
 
 def run_cmd(cmd):
     p = spr.Popen(cmd, stdout=spr.PIPE, stderr=spr.PIPE)
-    print(p, p.pid)
     out, err = p.communicate()
     if p.returncode != 0:
         raise spr.CalledProcessError(cmd, p.returncode)
@@ -19,6 +18,7 @@ def run_cmd(cmd):
         return out
 
 
+@lru_cache(maxsize=128)
 def query_summary(pkg):
     return run_cmd(['dpkg-query', '-f', '${binary:Summary}',
                    '--show', pkg]).decode()
@@ -52,7 +52,6 @@ def explain(process):
 
 def main():
     for p in psutil.process_iter():
-        print(p)
         explain(p)
 
 
