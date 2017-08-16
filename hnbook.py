@@ -58,6 +58,7 @@ def main():
     print(args)
 
     get_books(args.StoryID)
+    print("See result in /tmp/hnbooks.txt")
 
 
 if __name__ == "__main__":

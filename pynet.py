@@ -64,9 +64,9 @@ class PyNet(object):
 
     def scan_network(self):
         cidr = self.lan_ipv4 + "/" + get_net_size(self.netmask)
-        logger.info("Nmap scanning CIDR: %s", cidr)
-        cmd = ["nmap", "-sP", cidr]
-        output = spr.check_output(cmd)
+        logger.info("Nmap ping scaning CIDR: %s", cidr)
+        ping_scan = ["nmap", "-sn", cidr]
+        output = spr.check_output(ping_scan)
         for line in output.splitlines():
             logger.debug("Nmap output: %s", line)
             line = line.decode().split()
@@ -145,12 +145,8 @@ def main():
     c.scan_network()
     c.show_hosts()
     for host_ip in c.hosts:
-        # PyNet.ping(host)
-        # PyNet.ping_sweep(host)
-        # c.full_scan(host)
-        pass
-
-    c.show_gateway()
+        ping(host_ip)
+        c.full_scan(host_ip)
 
     # - save all data to db
     # tables
