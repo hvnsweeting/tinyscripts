@@ -39,5 +39,7 @@ for name, size in name_sizes.items():
 
 if msgs:
     notification = '\t'.join(msgs)
-    print("Notification", notification)
-    spr.call(['notify-send', notification])
+    # If call from cron, must set DISPLAY so notify-send knows where to send
+    import os
+    os.environ['DISPLAY'] = ':0'
+    spr.call(['/usr/bin/notify-send', notification])
