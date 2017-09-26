@@ -27,6 +27,7 @@ argp.add_argument("threshold", default=1024, type=int, nargs='?')
 args = argp.parse_args()
 
 THRESHOLD = args.threshold
+MEM_AVAIL_THRESHOLD = 500
 
 msgs = []
 name_sizes = defaultdict(int)
@@ -46,6 +47,11 @@ for name, size in name_sizes.items():
     if size > THRESHOLD:
         msg = "{}: {} MiB".format(name, size)
         msgs.append(msg)
+
+
+mem_avail_in_mib = psutil.virtual_memory().available // 1024 // 1024
+if mem_avail_in_mib < MEM_AVAIL_THRESHOLD:
+    msgs.insert(0, "Mem Warning: {:d} MiB available".format(mem_avail_in_mib))
 
 if msgs:
     notification = '\t'.join(msgs)
