@@ -51,7 +51,7 @@ for name, size in name_sizes.items():
 
 mem_avail_in_mib = psutil.virtual_memory().available // 1024 // 1024
 if mem_avail_in_mib < MEM_AVAIL_THRESHOLD:
-    msgs.insert(0, "Mem Warning: {:d} MiB available".format(mem_avail_in_mib))
+    msgs.insert(0, "Total: {:d} MiB available".format(mem_avail_in_mib))
 
 if msgs:
     notification = '\t'.join(msgs)
@@ -59,6 +59,8 @@ if msgs:
     import os
     os.environ['DISPLAY'] = ':0'
     logger.info(notification)
-    spr.call(['/usr/bin/notify-send', notification])
+    spr.call(['/usr/bin/notify-send', '--app-name', 'Malert',
+              '--icon', 'dialog-information',
+              'Memory', notification])
 else:
     logger.debug('No process that consumes lot of memory')
