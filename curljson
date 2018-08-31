@@ -1,0 +1,10 @@
+#!/bin/bash
+# vim ft: sh
+
+# Convert normal json to curl escaped style
+out=$(while read line
+do
+    echo $line | sed 's/"/\\"/g' | tr '\n' ' '
+done < "${1:-/dev/stdin}")
+echo \"$out\" | xclip -sel c
+echo \"$out\"
