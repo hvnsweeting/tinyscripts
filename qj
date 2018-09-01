@@ -1,7 +1,9 @@
 #!/bin/bash
 # vim ft: sh
 
-# Convert normal json to curl escaped style
+# QJ - quote JSON
+# Escapes JSON double quotes, for using with language that uses double quote
+# for string
 out=$(while read line
 do
     echo $line | sed 's/"/\\"/g' | tr '\n' ' '
