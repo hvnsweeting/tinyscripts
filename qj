@@ -4,6 +4,11 @@
 # QJ - quote JSON
 # Escapes JSON double quotes, for using with language that uses double quote
 # for string
+# Example
+#
+# $ curl https://httpbin.org/get 2>/dev/null | ./qj
+# "{ \"args\": {}, \"headers\": { \"Accept\": \"*/*\", \"Connection\": \"close\", \"Host\": \"httpbin.org\", \"User-Agent\": \"curl/7.47.0\" }, \"origin\": \"1.1.1.2\", \"url\": \"https://httpbin.org/get\" } "
+
 out=$(while read line
 do
     echo $line | sed 's/"/\\"/g' | tr '\n' ' '
