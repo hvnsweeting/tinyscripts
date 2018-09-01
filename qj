@@ -8,5 +8,10 @@ out=$(while read line
 do
     echo $line | sed 's/"/\\"/g' | tr '\n' ' '
 done < "${1:-/dev/stdin}")
-echo \"$out\" | xclip -sel c
+if command -v xclip >/dev/null; then
+    echo \"$out\" | xclip -sel c
+fi
+if command -v pbcopy >/dev/null; then
+    echo \"$out\" | pbcopy
+fi
 echo \"$out\"
